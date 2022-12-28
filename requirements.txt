@@ -1,2 +1,4 @@
 html2text
 wikipedia
+aiofiles
+aiohttp

@@ -31,12 +31,13 @@ async def fetch_save_async_summary(loop, articles):
 
 def gen_summary(level=4):
     os.makedirs('summaries', exist_ok=True)
-    src = f'https://en.wikipedia.org/wiki/Wikipedia:Vital_articles/Level/{level}'
-    content = requests.get(src).content.decode()
-    subtopics = re.findall(f'href="/wiki/Wikipedia:Vital_articles/Level/{level}/([^"]*)', content)
+    user_agent = 'unredactle_' + ''.join(chr(randint(97, 122)) for _ in range(10))
+    src = f'https://en.wikipedia.org/wiki/Wikipedia:Vital_articles/Level_{level}'
+    content = requests.get(src, headers={'User-Agent': user_agent}).content.decode()
+    subtopics = re.findall(f'href="https://en.wikipedia.org/wiki/Wikipedia:Vital_articles/Level_{level}/([^"]*)', content)
     for subtopic in sorted(set(subtopics)):
-        subcontent = requests.get(src + '/' + subtopic).content.decode()
-        articles = sorted(set(re.findall('href="/wiki/([^":]*)"', subcontent)))
+        subcontent = requests.get(src + '/' + subtopic, headers={'User-Agent': user_agent}).content.decode()
+        articles = sorted(set(re.findall('href="https://en.wikipedia.org/wiki/([^":]*)"', subcontent)))
         loop = asyncio.get_event_loop()
         future = asyncio.ensure_future(fetch_save_async_summary(loop, articles))
         loop.run_until_complete(future)
